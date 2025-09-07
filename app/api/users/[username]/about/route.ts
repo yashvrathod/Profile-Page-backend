@@ -4,92 +4,97 @@ export async function POST(req: Request, { params }: { params: { username: strin
   try {
     const { username } = params
     const body = await req.json()
-    
-    // Find the user
+
     const user = await prisma.user.findUnique({ where: { username } })
     if (!user) return new Response("User not found", { status: 404 })
 
-    // Map contacts: add icon in code (not in Prisma model)
-    const contacts = body.contacts.map((c: any) => ({
-      ...c,
-      icon: getIconForType(c.type) // assign icon in code
-    }))
+    // Safe defaults
+    const skills = body.skills || []
+    const cards = body.cards || []
+    const achievements = body.achievements || []
+    const contacts = body.contacts || []
 
     const about = await prisma.aboutSection.upsert({
-      where: { userId: user.id },
+      where: { userId: user.id }, // make sure userId is unique in schema
       update: {
-        heading: body.heading,
-        description: body.description,
+        heading: body.heading || "",
+        description: body.description || "",
         skills: {
           deleteMany: {},
-          create: body.skills.map((s: any, idx: number) => ({
-            label: s.label,
+          create: skills.map((s: any, idx: number) => ({
+            label: s.label || "",
             order: idx
           }))
         },
         cards: {
           deleteMany: {},
-          create: body.cards.map((c: any) => ({
-            title: c.title,
-            content: c.content,
+          create: cards.map((c: any) => ({
+            title: c.title || "",
+            content: c.content || "",
             bgColor: c.bgColor || undefined,
-            icon: getIconForCard(c) // optional, provide in code
+            icon: getIconForCard(c)
           }))
         },
         achievements: {
           deleteMany: {},
-          create: body.achievements.map((a: any) => ({
-            count: a.count,
-            label: a.label,
-            color: a.color,
-            bgColor: a.bgColor
+          create: achievements.map((a: any) => ({
+            count: a.count || 0,
+            label: a.label || "",
+            color: a.color || undefined,
+            bgColor: a.bgColor || undefined
           }))
         },
         contacts: {
           deleteMany: {},
-          create: body.contacts // store without icon in DB
+          create: contacts.map((c: any) => ({
+            type: c.type || "",
+            value: c.value || ""
+          }))
         }
       },
       create: {
         userId: user.id,
-        heading: body.heading,
-        description: body.description,
+        heading: body.heading || "",
+        description: body.description || "",
         skills: {
-          create: body.skills.map((s: any, idx: number) => ({
-            label: s.label,
+          create: skills.map((s: any, idx: number) => ({
+            label: s.label || "",
             order: idx
           }))
         },
         cards: {
-          create: body.cards.map((c: any) => ({
-            title: c.title,
-            content: c.content,
+          create: cards.map((c: any) => ({
+            title: c.title || "",
+            content: c.content || "",
             bgColor: c.bgColor || undefined,
-            icon: getIconForCard(c) // assign icon in code
+            icon: getIconForCard(c)
           }))
         },
         achievements: {
-          create: body.achievements.map((a: any) => ({
-            count: a.count,
-            label: a.label,
-            color: a.color,
-            bgColor: a.bgColor
+          create: achievements.map((a: any) => ({
+            count: a.count || 0,
+            label: a.label || "",
+            color: a.color || undefined,
+            bgColor: a.bgColor || undefined
           }))
         },
         contacts: {
-          create: body.contacts // save as-is, no icon
+          create: contacts.map((c: any) => ({
+            type: c.type || "",
+            value: c.value || ""
+          }))
         }
       }
     })
 
     return new Response(JSON.stringify(about), { status: 200 })
   } catch (err) {
-    console.error(err)
+    console.error("AboutSection POST error:", err)
     return new Response("Internal Server Error", { status: 500 })
   }
 }
 
-// Helper to provide icon dynamically in code
+// Helpers
 function getIconForType(type: string) {
   switch (type.toLowerCase()) {
     case "email": return "✉️"
@@ -100,5 +105,5 @@ function getIconForType(type: string) {
 }
 
 function getIconForCard(card: any) {
-  return card.icon || "⭐" // default icon if none provided
+  return card.icon || "⭐"
 }
