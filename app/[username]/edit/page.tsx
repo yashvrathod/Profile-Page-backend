@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation"
-import { getUserByUsername } from "@/lib/user-service"
+import { getUserByUsername } from "@/lib/server/user-service"
 import { ProfileEditor } from "@/components/profile-editor"
 
 interface EditProfilePageProps {

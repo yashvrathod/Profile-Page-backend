@@ -2,7 +2,7 @@ import { notFound } from "next/navigation"
 import { TemplateMinimalist } from "@/components/templates/template-minimalist"
 import TemplateAcademic from "@/components/templates/template-academic"
 import { TemplateVibrant } from "@/components/templates/template-vibrant"
-import { getUserByUsername } from "@/lib/user-service"
+import { getUserByUsername } from "@/lib/server/user-service"
 
 interface ProfilePageProps {
   params: {

@@ -1093,7 +1093,7 @@ case "technicalSkills":
   </div>
 </section>
 
-        
+
   <div className="absolute top-10 left-10 w-36 h-36 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
   <div className="absolute bottom-20 right-20 w-56 h-56 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
 </section> */}
