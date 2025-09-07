@@ -1,0 +1,322 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  email     String?  @unique
+  name      String?
+  template  String   @default("template1") // template1, template2, template3
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Profile sections
+  overview            Overview?
+  interests           Interest[]
+  technicalSkills     TechnicalSkill[]
+  teaching            Teaching[]
+  certifications      Certification[]
+  invitedTalks        InvitedTalk[]
+  research            Research[]
+  journals            Journal[]
+  conferences         Conference[]
+  books               Book[]
+  patents             Patent[]
+  industryInteraction IndustryInteraction[]
+
+  customSection CustomSection[]
+  profile       Profile?
+  aboutSection  AboutSection?
+
+  @@map("users")
+}
+
+model Overview {
+  id           String  @id @default(cuid())
+  userId       String  @unique
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title        String?
+  description  String?
+  bio          String?
+  location     String?
+  website      String?
+  linkedin     String?
+  twitter      String?
+  github       String?
+  profileImage String?
+
+  @@map("overviews")
+}
+
+model Interest {
+  id          String  @id @default(cuid())
+  userId      String
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  category    String?
+
+  @@map("interests")
+}
+
+model TechnicalSkill {
+  id          String  @id @default(cuid())
+  userId      String
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  level       String? // Beginner, Intermediate, Advanced, Expert
+  category    String? // Programming, Frameworks, Tools, etc.
+  description String?
+
+  @@map("technical_skills")
+}
+
+model Teaching {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  institution String?
+  course      String?
+  level       String? // Undergraduate, Graduate, Professional
+  startDate   DateTime?
+  endDate     DateTime?
+  description String?
+
+  @@map("teaching")
+}
+
+model Certification {
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  issuer       String?
+  issueDate    DateTime?
+  expiryDate   DateTime?
+  credentialId String?
+  url          String?
+  description  String?
+
+  @@map("certifications")
+}
+
+model InvitedTalk {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  event       String?
+  location    String?
+  date        DateTime?
+  audience    String?
+  description String?
+  url         String?
+
+  @@map("invited_talks")
+}
+
+model Research {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title         String
+  type          String? // Project, Publication, Grant, etc.
+  status        String? // Ongoing, Completed, Published
+  startDate     DateTime?
+  endDate       DateTime?
+  collaborators String?
+  funding       String?
+  description   String?
+  url           String?
+
+  @@map("research")
+}
+
+model Journal {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  journal     String?
+  authors     String?
+  publishDate DateTime?
+  volume      String?
+  issue       String?
+  pages       String?
+  doi         String?
+  url         String?
+  abstract    String?
+
+  @@map("journals")
+}
+
+model Conference {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title      String
+  conference String?
+  location   String?
+  date       DateTime?
+  type       String? // Presentation, Poster, Workshop
+  authors    String?
+  abstract   String?
+  url        String?
+
+  @@map("conferences")
+}
+
+model Book {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  authors     String?
+  publisher   String?
+  publishDate DateTime?
+  isbn        String?
+  pages       Int?
+  description String?
+  url         String?
+
+  @@map("books")
+}
+
+model Patent {
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title        String
+  patentNumber String?
+  inventors    String?
+  assignee     String?
+  filingDate   DateTime?
+  grantDate    DateTime?
+  status       String? // Filed, Granted, Expired
+  description  String?
+  url          String?
+
+  @@map("patents")
+}
+
+model IndustryInteraction {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  company     String?
+  role        String?
+  type        String? // Consulting, Collaboration, Advisory
+  startDate   DateTime?
+  endDate     DateTime?
+  description String?
+  url         String?
+
+  @@map("industry_interactions")
+}
+
+model CustomSection {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String // e.g., "Hobbies", "Side Projects"
+  key       String   @unique // autogenerated slug/key for API usage
+  createdAt DateTime @default(now())
+
+  items CustomSectionItem[]
+
+  @@map("custom_sections")
+}
+
+model CustomSectionItem {
+  id          String        @id @default(cuid())
+  sectionId   String
+  section     CustomSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  category    String?
+  createdAt   DateTime      @default(now())
+
+  @@map("custom_section_items")
+}
+
+model Profile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name         String
+  headline     String? // e.g. "I craft visually stunning web experiences..."
+  bio          String? // Long text about yourself
+  profileImage String? // Image URL (you can store path in /uploads)
+
+  primaryButtonLabel   String? // e.g. "View My Work"
+  primaryButtonLink    String?
+  secondaryButtonLabel String? // e.g. "Contact Me"
+  secondaryButtonLink  String?
+
+  // Optional: if you want to control colors dynamically
+  gradientFrom String? // e.g. "pink-500"
+  gradientVia  String?
+  gradientTo   String?
+}
+
+model AboutSection {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  heading      String        @default("About Me")
+  description  String
+  skills       Skill[] // relation to Skill model
+  cards        FeatureCard[]
+  achievements Achievement[]
+  contacts     Contact[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Skill {
+  id      String       @id @default(cuid())
+  label   String
+  order   Int // To control display order
+  aboutId String
+  about   AboutSection @relation(fields: [aboutId], references: [id])
+}
+
+model FeatureCard {
+  id      String       @id @default(cuid())
+  icon    String? // emoji or icon name
+  title   String
+  content String
+  bgColor String? // e.g. "bg-pink-100"
+  aboutId String
+  about   AboutSection @relation(fields: [aboutId], references: [id])
+}
+
+model Achievement {
+  id      String       @id @default(cuid())
+  count   String // "80+", "18+" etc
+  label   String // "Publications"
+  color   String? // Tailwind text color e.g. "text-cyan-600"
+  bgColor String? // optional background
+  aboutId String
+  about   AboutSection @relation(fields: [aboutId], references: [id])
+}
+
+model Contact {
+  id      String       @id @default(cuid())
+  type    String // "email", "call", "linkedin"
+  label   String // "Email", "Call", "LinkedIn"
+  link    String // URL or mailto/tel
+  style   String? // e.g. "bg-emerald-600 text-white"
+  aboutId String
+  about   AboutSection @relation(fields: [aboutId], references: [id])
+}
